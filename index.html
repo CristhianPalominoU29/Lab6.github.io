@@ -1,172 +1,130 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actividad Deep Learning - Teachable Machine</title>
 
-    <script src="https://jsdelivr.net"></script>
+    <title>Clasificador de Objetos Tecnológicos mediante Deep Learning</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between">
 
-    <!-- Encabezado -->
-    <header class="bg-indigo-600 text-white shadow-md py-6 text-center">
-        <h1 class="text-3xl font-bold tracking-tight">Clasificador de Imágenes en Tiempo Real</h1>
-        <p class="text-indigo-200 mt-2 text-sm md:text-base">Proyecto académico con Deep Learning y Teachable Machine</p>
+<body>
+
+    <!-- ==========================================
+         ENCABEZADO
+    =========================================== -->
+
+    <header>
+
+        <h1>
+            Clasificador de Objetos Tecnológicos
+            mediante Deep Learning
+        </h1>
+
+        <p>
+            Proyecto académico con Teachable Machine
+        </p>
+
     </header>
 
-    <!-- Contenido Principal -->
-    <main class="max-w-4xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-start my-auto">
-        
-        <!-- Columna Izquierda: Cámara y Controles -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-            <h2 class="text-xl font-semibold mb-4 self-start text-slate-700">Entrada de Video</h2>
-            
-            <!-- Contenedor de la Webcam -->
-            <div id="webcam-container" class="w-full aspect-video bg-slate-900 rounded-xl overflow-hidden shadow-inner flex items-center justify-center text-slate-500 relative border border-slate-200">
-                <span id="placeholder-text" class="absolute text-center p-4">La cámara aparecerá aquí al iniciar</span>
+
+    <!-- ==========================================
+         CONTENIDO PRINCIPAL
+    =========================================== -->
+
+    <main>
+
+        <!-- ==========================================
+             CÁMARA
+        =========================================== -->
+
+        <section class="card">
+
+            <h2>
+                Cámara
+            </h2>
+
+            <div id="webcam-container">
+
+                <span id="placeholder-text">
+                    La cámara aparecerá aquí al iniciar
+                </span>
+
             </div>
 
-            <!-- Botón de Control -->
-            <button id="btn-start" onclick="init()" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-xl transition duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer text-center">
+            <button id="btn-start">
                 Iniciar Cámara y Modelo
             </button>
-            <p id="loading-text" class="text-sm text-amber-600 mt-2 font-medium hidden">Cargando modelo... por favor espera.</p>
+
+            <p id="loading-text" class="hidden">
+                Cargando modelo... por favor espera.
+            </p>
+
         </section>
 
-        <!-- Columna Derecha: Resultados -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full flex flex-col">
-            <h2 class="text-xl font-semibold mb-4 text-slate-700">Predicciones en Tiempo Real</h2>
-            
-            <!-- Contenedor donde se insertarán las barras de porcentaje -->
-            <div id="label-container" class="space-y-4 my-auto">
-                <p class="text-slate-400 italic text-center py-8">Inicia el modelo para ver las predicciones</p>
+
+        <!-- ==========================================
+             PREDICCIONES
+        =========================================== -->
+
+        <section class="card">
+
+            <h2>
+                Predicciones en Tiempo Real
+            </h2>
+
+            <div id="label-container">
+
+                <p id="initial-message">
+                    Inicia el modelo para ver las predicciones
+                </p>
+
             </div>
+
         </section>
 
     </main>
 
-    <!-- Pie de página -->
-    <footer class="bg-slate-100 text-slate-500 text-center py-4 border-t border-slate-200 text-xs md:text-sm">
-        <p>&copy; 2026 - Actividad Académica de Inteligencia Artificial</p>
+
+    <!-- ==========================================
+         PIE DE PÁGINA
+    =========================================== -->
+
+    <footer>
+
+        <p>
+            &copy; 2026 - Clasificador de Objetos Tecnológicos
+        </p>
+
     </footer>
 
-    <!-- Dependencias de Teachable Machine -->
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://jsdelivr.net"></script>
 
-    <!-- Lógica de JavaScript -->
-    <script type="text/javascript">
-        // -------------------------------------------------------------------------
-        // CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA DE TU PROPIO MODELO EXPORTADO
-        // -------------------------------------------------------------------------
-        const URL_MODELO = "https://withgoogle.com"; 
-        // Nota: Asegúrate de mantener la barra diagonal "/" al final de la URL.
+    <!-- ==========================================
+         TENSORFLOW.JS
+    =========================================== -->
 
-        let model, webcam, labelContainer, maxClassNameTokens;
-        let isPlaying = false;
-
-        async function init() {
-            if (isPlaying) return; // Evita inicializar múltiples veces si hacen doble clic
-            
-            const btn = document.getElementById("btn-start");
-            const loadingText = document.getElementById("loading-text");
-            const placeholder = document.getElementById("placeholder-text");
-
-            btn.disabled = true;
-            btn.classList.add("opacity-50", "cursor-not-allowed");
-            loadingText.classList.remove("hidden");
-
-            try {
-                const modelURL = URL_MODELO + "model.json";
-                const metadataURL = URL_MODELO + "metadata.json";
-
-                // Cargar el modelo
-                model = await tmImage.load(modelURL, metadataURL);
-                maxClassNameTokens = model.getTotalClasses();
-
-                // Configurar la webcam
-                const flip = true; // Voltear la cámara para efecto espejo
-                webcam = new tmImage.Webcam(400, 300, flip); // Ancho, alto, flip
-                await webcam.setup(); // Solicitar acceso a la cámara
-                await webcam.play();
-                
-                // Reemplazar placeholder con el canvas real de la webcam
-                placeholder.classList.add("hidden");
-                document.getElementById("webcam-container").appendChild(webcam.canvas);
-                
-                // Ajustar estilos del canvas generado dinámicamente para que sea responsivo
-                webcam.canvas.className = "w-full h-full object-cover";
-
-                // Preparar el contenedor de resultados de forma limpia
-                labelContainer = document.getElementById("label-container");
-                labelContainer.innerHTML = ""; // Limpiar texto de espera
-                
-                // Crear la estructura visual para cada clase/categoría
-                for (let i = 0; i < maxClassNameTokens; i++) {
-                    const classDiv = document.createElement("div");
-                    classDiv.className = "flex flex-col gap-1";
-                    classDiv.innerHTML = `
-                        <div class="flex justify-between text-sm font-medium text-slate-700">
-                            <span class="class-name">Clase ${i+1}</span>
-                            <span class="class-percentage font-bold text-indigo-600">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                            <div class="class-bar bg-indigo-500 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
-                        </div>
-                    `;
-                    labelContainer.appendChild(classDiv);
-                }
-
-                isPlaying = true;
-                loadingText.classList.add("hidden");
-                btn.innerText = "Modelo en Ejecución";
-                
-                // Iniciar el bucle de predicción
-                window.requestAnimationFrame(loop);
-
-            } catch (error) {
-                console.error("Error al iniciar el modelo o la cámara:", error);
-                alert("No se pudo acceder a la cámara o cargar el modelo. Verifica los permisos de tu navegador o la URL provista.");
-                btn.disabled = false;
-                btn.classList.remove("opacity-50", "cursor-not-allowed");
-                loadingText.classList.add("hidden");
-            }
-        }
-
-        async function loop() {
-            if (!isPlaying) return;
-            webcam.update(); // Actualizar el frame de la webcam
-            await predict();
-            window.requestAnimationFrame(loop);
-        }
-
-        async function predict() {
-            // El modelo realiza la predicción pasándole el elemento canvas de la webcam
-            const prediction = await model.predict(webcam.canvas);
-            
-            const names = labelContainer.getElementsByClassName("class-name");
-            const percentages = labelContainer.getElementsByClassName("class-percentage");
-            const bars = labelContainer.getElementsByClassName("class-bar");
-
-            for (let i = 0; i < maxClassNameTokens; i++) {
-                const className = prediction[i].className;
-                const probability = prediction[i].probability;
-                const percentText = (probability * 100).toFixed(0) + "%";
-
-                // Actualizar textos y barra de progreso dinámicamente
-                names[i].innerText = className;
-                percentages[i].innerText = percentText;
-                bars[i].style.width = percentText;
-
-                // Destacar visualmente la clase con mayor confianza (si supera el 70%)
-                if (probability > 0.7) {
-                    bars[i].classList.replace("bg-indigo-500", "bg-emerald-500");
-                } else {
-                    bars[i].classList.replace("bg-emerald-500", "bg-indigo-500");
-                }
-            }
-        }
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js">
     </script>
+
+
+    <!-- ==========================================
+         TEACHABLE MACHINE
+    =========================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js">
+    </script>
+
+
+    <!-- ==========================================
+         NUESTRO JAVASCRIPT
+    =========================================== -->
+
+    <script src="script.js"></script>
+
 </body>
+
 </html>
+```
